@@ -49,6 +49,9 @@ defmodule Tags do
 
   @doc """
   Given a drop number and a set of rules, create a tag system.
+
+  > system = Tags.make_system(2, a: 'aaa', b: 'ab')
+  {2, 'Hab', [{97, 'aaa'}, {98, 'ab'}]}
   """
   @spec make_system(drop_number, [{atom, charlist}]) :: tag_system
   def make_system(drop, rules) do
