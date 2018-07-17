@@ -1,4 +1,6 @@
 defmodule Tags do
+  require Logger
+
   @moduledoc """
   Models a tag system, consisting of three elements: a drop_number,
   alphabet, and ruleset.
@@ -57,11 +59,23 @@ defmodule Tags do
   def make_system(drop, rules) do
     to_chars =
       for {atom, production} <- rules do
-        {atom |> to_charlist() |> hd(), production}
+        {atom_to_symbol(atom), production}
       end
 
-    alphabet = get_alphabet(to_chars)
-    {drop, alphabet, to_chars}
+    unless Enum.any?(rules, fn {_, p} -> Enum.member?(p, @halting_char) end) do
+      Logger.warn("No rules will terminate. This may result in an infinite loop.")
+    end
+
+    {drop, get_alphabet(to_chars), to_chars}
+  end
+
+  defp atom_to_symbol(atom) do
+    charlist = Atom.to_charlist(atom)
+
+    case length(charlist) do
+      1 -> hd(charlist)
+      _ -> raise "Ruleset keys must be one character long"
+    end
   end
 
   defp get_alphabet(rules) do
