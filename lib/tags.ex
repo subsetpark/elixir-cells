@@ -27,12 +27,12 @@ defmodule Tags do
   """
   @type rule :: {symbol, word}
 
-  @type symbol :: term
-
   @typedoc """
   A sequence of elements, possibly including a termination character.
   """
   @type word :: [symbol]
+
+  @type symbol :: term
 
   @halting_char ?H
 
@@ -40,13 +40,13 @@ defmodule Tags do
   Given a word and tag system, process the word according to the system
   rules and return the halting word.
   """
-  @spec process_state(word, tag_system) :: word
-  def process_state(word, {drop, _, _}) when length(word) < drop, do: word
-  def process_state([@halting_char | _] = word, _), do: word
+  @spec produce(word, tag_system) :: word
+  def produce(word, {drop, _, _}) when length(word) < drop, do: word
+  def produce([@halting_char | _] = word, _), do: word
 
-  def process_state([h | _] = word, {drop, _, rules} = system) do
-    production = CA.apply_rules(h, rules)
-    process_state(Enum.drop(word, drop) ++ production, system)
+  def produce([h | _] = word, {drop, _, rules} = system) do
+    production = CA.Util.produce(h, rules)
+    produce(Enum.drop(word, drop) ++ production, system)
   end
 
   @doc """

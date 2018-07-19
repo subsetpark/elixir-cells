@@ -1,27 +1,22 @@
-defmodule CA do
-  def apply_rules(neighborhood, [{neighborhood, r} | _]), do: r
+defmodule CA.Elementary do
+  def bits, do: 3
 
-  def apply_rules(neighborhood, [_ | rules]) do
-    apply_rules(neighborhood, rules)
-  end
+  def produce(state, rules), do: produce(state, rules, [], 0)
 
-  def process_state(state, rules), do: process_state(state, rules, [], 0)
+  defp produce(state, _, out, n) when n == length(state), do: Enum.reverse(out)
 
-  defp process_state(state, _, out, n) when n == length(state), do: Enum.reverse(out)
-  defp process_state(state, rules, out, n) do
-    neighborhood = for k <- -1..1, i <- rem((k + n), length(state)), do: Enum.fetch!(state, i)
-    r = apply_rules(neighborhood, rules)
-    process_state(state, rules, [r|out], n+1)
+  defp produce(state, rules, out, n) do
+    neighborhood = for k <- -1..1, i = rem(k + n, length(state)), do: Enum.fetch!(state, i)
+    production = CA.Util.produce(neighborhood, rules)
+    produce(state, rules, [production | out], n + 1)
   end
 
   def make_state(n) do
     for _ <- 1..n, do: :rand.uniform(2) - 1
   end
 
-  def render(s) do
-    IO.puts for d <- s, do: render_cell(d)
+  def render(s, render_fn) do
+    :ok = IO.puts(for d <- s, do: render_fn.(d))
+    s
   end
-
-  defp render_cell(cell) when cell == 0, do: ?\s
-  defp render_cell(_), do: ?\#
 end
