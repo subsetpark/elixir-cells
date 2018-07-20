@@ -7,9 +7,14 @@ defmodule Tags do
   """
 
   @typedoc """
+  A list of possible elements in a word.
+  """
+  @type alphabet :: charlist
+
+  @typedoc """
   A tuple containing a set of drop and production rules for a tag system.
   """
-  @type tag_system :: {drop_number, alphabet, [rule]}
+  @type tag_system :: {drop_number, alphabet, [CA.rule(char)]}
 
   @typedoc """
   A number indicating how many elements to drop from the beginning of
@@ -17,30 +22,13 @@ defmodule Tags do
   """
   @type drop_number :: non_neg_integer
 
-  @typedoc """
-  A list of possible elements in a word.
-  """
-  @type alphabet :: symbol
-
-  @typedoc """
-  A pairing of an elment and the sequence of elements it should produce.
-  """
-  @type rule :: {symbol, word}
-
-  @typedoc """
-  A sequence of elements, possibly including a termination character.
-  """
-  @type word :: [symbol]
-
-  @type symbol :: term
-
   @halting_char ?H
 
   @doc """
   Given a word and tag system, process the word according to the system
   rules and return the halting word.
   """
-  @spec produce(word, tag_system) :: word
+  @spec produce(CA.word(char), tag_system) :: CA.word(char)
   def produce(word, {drop, _, _}) when length(word) < drop, do: word
   def produce([@halting_char | _] = word, _), do: word
 
@@ -85,7 +73,7 @@ defmodule Tags do
   @doc """
   Generate a random word from a system's alphabet.
   """
-  @spec make_state(drop_number, tag_system) :: word
+  @spec make_state(drop_number, tag_system) :: CA.word(char)
   def make_state(size, {_, alphabet, _}) do
     for _ <- 1..size, do: Enum.random(alphabet)
   end

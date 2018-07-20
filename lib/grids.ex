@@ -4,8 +4,13 @@ defmodule Grid do
   @moduledoc """
   Implement common NxN grid functions.
   """
+
+  @type t :: %Grid{map: %{required({integer, integer}) => CA.bit()}, size: integer}
+
+  @spec size(t) :: integer
   def size(grid), do: grid.size
 
+  @spec new_grid(integer) :: t
   def new_grid(size) do
     map =
       for(
@@ -23,6 +28,7 @@ defmodule Grid do
     {rem(n, size), div(n, size)}
   end
 
+  @spec get_neighborhood(t, integer) :: CA.word()[CA.bit()]
   def get_neighborhood(grid, n) do
     {x, y} = integer_to_coords(grid, n)
 
@@ -51,6 +57,7 @@ defmodule Grid do
     %{grid | map: map}
   end
 
+  @spec set_cell(t, integer, CA.bit()) :: t
   def set_cell(grid, n, value) do
     {x, y} = integer_to_coords(grid, n)
     set_coords(grid, x, y, value)
@@ -60,6 +67,7 @@ defmodule Grid do
     for x <- 0..grid.size, do: get_cell(grid, x, y)
   end
 
+  @spec rows(t) :: [[CA.bit()]]
   def rows(grid) do
     for y <- 0..grid.size, do: get_row(grid, y)
   end

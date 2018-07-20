@@ -8,8 +8,8 @@ defmodule Mix.Tasks.Ca do
         "vn" -> CA.VonNeumann
       end
 
-    {state, init} = CA.Util.init(module, String.to_integer(rule_number), String.to_integer(size))
-    CA.Util.run(state, init, String.to_integer(iters))
+    {state, init} = CA.init(module, String.to_integer(rule_number), String.to_integer(size))
+    CA.run(state, init, String.to_integer(iters))
   end
 
   def run([rule_number, size, iters]) do
