@@ -1,8 +1,26 @@
 defmodule Grid do
+  defstruct map: %{}, size: 0
+
+  @moduledoc """
+  Implement common NxN grid functions.
+  """
+  def size(grid), do: grid.size
+
   def new_grid(size) do
-    0
-    |> Tuple.duplicate(size)
-    |> Tuple.duplicate(size)
+    map =
+      for(
+        y <- 0..(size - 1),
+        x <- 0..(size - 1),
+        do: {x, y}
+      )
+      |> Enum.reduce(%{}, fn k, m -> Map.put(m, k, 0) end)
+
+    %Grid{map: map, size: size}
+  end
+
+  defp integer_to_coords(grid, n) do
+    size = grid.size
+    {rem(n, size), div(n, size)}
   end
 
   def get_neighborhood(grid, n) do
@@ -13,21 +31,24 @@ defmodule Grid do
     end
   end
 
-  defp to_index(n, modulus) do
-    index = rem(n, modulus)
+  defp to_index({x, y}, modulus) do
+    {to_index(x, modulus), to_index(y, modulus)}
+  end
 
-    cond do
-      index < 0 -> modulus + index
-      true -> index
+  defp to_index(n, modulus) do
+    case rem(n, modulus) do
+      index when index < 0 -> modulus + index
+      index -> index
     end
   end
 
   defp get_cell(grid, x, y) do
-    size = tuple_size(grid)
+    Map.get(grid.map, to_index({x, y}, grid.size))
+  end
 
-    grid
-    |> elem(to_index(y, size))
-    |> elem(to_index(x, size))
+  defp set_coords(grid, x, y, value) do
+    map = Map.put(grid.map, to_index({x, y}, grid.size), value)
+    %{grid | map: map}
   end
 
   def set_cell(grid, n, value) do
@@ -35,21 +56,11 @@ defmodule Grid do
     set_coords(grid, x, y, value)
   end
 
-  defp set_coords(grid, x, y, value) do
-    size = tuple_size(grid)
-    x_index = to_index(x, size)
-    y_index = to_index(y, size)
-
-    updated_row =
-      grid
-      |> elem(y_index)
-      |> put_elem(x_index, value)
-
-    put_elem(grid, y_index, updated_row)
+  defp get_row(grid, y) do
+    for x <- 0..grid.size, do: get_cell(grid, x, y)
   end
 
-  defp integer_to_coords(grid, n) do
-    size = tuple_size(grid)
-    {rem(n, size), div(n, size)}
+  def rows(grid) do
+    for y <- 0..grid.size, do: get_row(grid, y)
   end
 end

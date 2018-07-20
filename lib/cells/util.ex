@@ -1,4 +1,7 @@
 defmodule CA.Util do
+  @moduledoc """
+  Generic functions for managing CAs.
+  """
   defp expand(n, bits) do
     unpadded = Integer.digits(n, 2)
     to_pad = bits - length(unpadded)
@@ -15,6 +18,18 @@ defmodule CA.Util do
     |> Enum.zip(expand(n, max))
   end
 
+  def init(module, rule_number, state_size) do
+    f = fn
+      cell when cell == 0 -> ?\s
+      _ -> ?\█
+    end
+
+    render_fn = fn state -> module.render(state, f) end
+
+    {module.make_state(state_size),
+     {make_rule(rule_number, module.bits()), &module.produce/2, render_fn}}
+  end
+
   def run(_, _, 0), do: :ok
 
   def run(state, {rules, gen_fn, render_fn}, iterations) do
@@ -22,16 +37,6 @@ defmodule CA.Util do
     |> render_fn.()
     |> run({rules, gen_fn, render_fn}, iterations - 1)
   end
-
-  def init(module \\ CA.Elementary, rule_number, state_size) do
-    render_fn = fn state -> module.render(state, &render_cell/1) end
-
-    {module.make_state(state_size),
-     {make_rule(rule_number, module.bits()), &module.produce/2, render_fn}}
-  end
-
-  defp render_cell(cell) when cell == 0, do: ?\s
-  defp render_cell(_), do: ?\█
 
   def produce(neighborhood, [{neighborhood, p} | _]), do: p
 

@@ -2,7 +2,7 @@ defmodule CA.VonNeumann do
   def bits, do: 5
 
   def produce(state, rules) do
-    size = tuple_size(state)
+    size = Grid.size(state)
     produce(state, rules, Grid.new_grid(size), size * size, 0)
   end
 
@@ -31,9 +31,8 @@ defmodule CA.VonNeumann do
     IO.write([IO.ANSI.home(), IO.ANSI.clear()])
     IEx.dont_display_result()
 
-    for row <- Tuple.to_list(state) do
+    for row <- Grid.rows(state) do
       row
-      |> Tuple.to_list()
       |> Enum.map(render_fn)
       |> IO.puts()
     end
