@@ -20,7 +20,7 @@ defmodule CA.Elementary do
   end
 
   @spec make_state(integer) :: t
-  def make_state(n) do
+  def make_state(n) when n >= 1 do
     for _ <- 1..n, do: :rand.uniform(2) - 1
   end
 

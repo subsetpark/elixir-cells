@@ -4,17 +4,15 @@ defmodule CA.VonNeumann do
   """
 
   @spec bits :: integer
-  def bits, do: 5
+  def bits, do: 9
 
-  defp produce(_, _, acc, n, n), do: acc
-
-  defp produce(state, rules, acc, final_n, n) do
+  defp produce(state, rules, coords) do
     production =
       state
-      |> Grid.get_neighborhood(n)
+      |> Grid.get_neighborhood(coords)
       |> CA.Util.produce(rules)
 
-    produce(state, rules, Grid.set_cell(acc, n, production), final_n, n + 1)
+    Grid.set_coords(state, coords, production)
   end
 
   @doc """
@@ -22,8 +20,9 @@ defmodule CA.VonNeumann do
   """
   @spec produce(Grid.t(), [CA.rule(CA.bit())]) :: Grid.t()
   def produce(state, rules) do
-    size = Grid.size(state)
-    produce(state, rules, Grid.new_grid(size), size * size, 0)
+    Enum.reduce(Grid.coords(state), state, fn coord_pair, acc ->
+      produce(acc, rules, coord_pair)
+    end)
   end
 
   @doc """
@@ -31,13 +30,14 @@ defmodule CA.VonNeumann do
   """
   @spec make_state(integer) :: Grid.t()
   def make_state(n) do
-    f = fn k, grid ->
+    grid = Grid.new_grid(n)
+
+    f = fn coord_pair, acc ->
       value = :rand.uniform(2) - 1
-      Grid.set_cell(grid, k, value)
+      Grid.set_coords(acc, coord_pair, value)
     end
 
-    0..(n * n - 1)
-    |> Enum.reduce(Grid.new_grid(n), f)
+    Enum.reduce(Grid.coords(grid), grid, f)
   end
 
   @doc """

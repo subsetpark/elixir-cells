@@ -2,6 +2,7 @@ defmodule CA do
   @doc """
   Entry module for initializing and running cellular automata.
   """
+  @type t :: any()
 
   @typedoc """
   A pairing of an elment and the sequence of elements it should produce.

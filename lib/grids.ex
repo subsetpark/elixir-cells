@@ -7,32 +7,40 @@ defmodule Grid do
 
   @type t :: %Grid{map: %{required({integer, integer}) => CA.bit()}, size: integer}
 
-  @spec size(t) :: integer
-  def size(grid), do: grid.size
-
   @spec new_grid(integer) :: t
-  def new_grid(size) do
+  def new_grid(length) do
     map =
       for(
-        y <- 0..(size - 1),
-        x <- 0..(size - 1),
+        y <- 0..(length - 1),
+        x <- 0..(length - 1),
         do: {x, y}
       )
       |> Enum.reduce(%{}, fn k, m -> Map.put(m, k, 0) end)
 
-    %Grid{map: map, size: size}
+    %Grid{map: map, size: length}
   end
 
-  defp integer_to_coords(grid, n) do
-    size = grid.size
-    {rem(n, size), div(n, size)}
+  defp surrounding_coords({x, y}) do
+    [
+      {x - 1, y - 1},
+      {x - 1, y},
+      {x - 1, y + 1},
+      {x, y - 1},
+      {x, y},
+      {x, y + 1},
+      {x + 1, y - 1},
+      {x + 1, y},
+      {x + 1, y + 1}
+    ]
   end
 
-  @spec get_neighborhood(t, integer) :: CA.word()[CA.bit()]
-  def get_neighborhood(grid, n) do
-    {x, y} = integer_to_coords(grid, n)
+  defp get_cell(grid, x, y) do
+    Map.get(grid.map, to_index({x, y}, grid.size))
+  end
 
-    for {x2, y2} <- [{x, y}, {x - 1, y}, {x + 1, y}, {x, y - 1}, {x, y + 1}] do
+  @spec get_neighborhood(t, {integer, integer}) :: CA.word()[CA.bit()]
+  def get_neighborhood(grid, coords) do
+    for {x2, y2} <- surrounding_coords(coords) do
       get_cell(grid, x2, y2)
     end
   end
@@ -48,19 +56,9 @@ defmodule Grid do
     end
   end
 
-  defp get_cell(grid, x, y) do
-    Map.get(grid.map, to_index({x, y}, grid.size))
-  end
-
-  defp set_coords(grid, x, y, value) do
-    map = Map.put(grid.map, to_index({x, y}, grid.size), value)
+  def set_coords(grid, {x, y}, value) do
+    map = Map.replace!(grid.map, to_index({x, y}, grid.size), value)
     %{grid | map: map}
-  end
-
-  @spec set_cell(t, integer, CA.bit()) :: t
-  def set_cell(grid, n, value) do
-    {x, y} = integer_to_coords(grid, n)
-    set_coords(grid, x, y, value)
   end
 
   defp get_row(grid, y) do
@@ -70,5 +68,9 @@ defmodule Grid do
   @spec rows(t) :: [[CA.bit()]]
   def rows(grid) do
     for y <- 0..grid.size, do: get_row(grid, y)
+  end
+
+  def coords(grid) do
+    Map.keys(grid.map)
   end
 end
