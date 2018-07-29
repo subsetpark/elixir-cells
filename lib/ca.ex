@@ -34,20 +34,19 @@ defmodule CA do
     |> Enum.zip(expand(n, max))
   end
 
-  @type system(t) :: {[rule(t)], fun, fun}
+  @type system(t) :: {[rule(t)], atom}
 
   @spec init(atom, integer, integer) :: {word(bit), system(bit)}
   def init(module, rule_number, state_size) do
-    {module.make_state(state_size),
-     {make_rules(rule_number, module.bits()), &module.produce/2, &module.render/1}}
+    {module.make_state(state_size), {make_rules(rule_number, module.bits()), module}}
   end
 
   @spec run(word(any), system(any), integer) :: :ok
   def run(_, _, 0), do: :ok
 
-  def run(state, {rules, gen_fn, render_fn}, iterations) do
-    gen_fn.(state, rules)
-    |> render_fn.()
-    |> run({rules, gen_fn, render_fn}, iterations - 1)
+  def run(state, {rules, module}, iterations) do
+    module.produce(state, rules)
+    |> module.render()
+    |> run({rules, module}, iterations - 1)
   end
 end
