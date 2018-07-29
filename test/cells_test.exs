@@ -40,6 +40,31 @@ defmodule GridsTest do
     end
   end
 
+  test "von neumann neighborhood ordering" do
+    vn_grid = %Grid{
+      map: %{
+        {0, 0} => 1,
+        {1, 0} => 2,
+        {2, 0} => 3,
+        {0, 1} => 4,
+        {1, 1} => 5,
+        {2, 1} => 6,
+        {0, 2} => 7,
+        {1, 2} => 8,
+        {2, 2} => 9
+      },
+      size: 3,
+      type: :von_neumann
+    }
+
+    assert Grid.get_neighborhood(vn_grid, {1, 1}) == [2, 4, 5, 6, 8]
+    assert Grid.get_neighborhood(vn_grid, {1, 0}) == [8, 1, 2, 3, 5]
+
+    moore_grid = %Grid{vn_grid | type: :moore}
+
+    assert Grid.get_neighborhood(moore_grid, {1, 1}) == [1, 2, 3, 4, 5, 6, 7, 8, 9]
+  end
+
   property "neighborhood size is always 9" do
     check all length <- integer() |> filter(&(&1 > 0)),
               x <- integer() |> filter(&(&1 < length)),

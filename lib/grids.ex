@@ -5,7 +5,11 @@ defmodule Grid do
   Implement common NxN grid functions.
   """
 
-  @type t :: %Grid{map: %{required({integer, integer}) => CA.bit()}, size: integer, type: :moore | :von_neumann}
+  @type t :: %Grid{
+          map: %{required({integer, integer}) => CA.bit()},
+          size: integer,
+          type: :moore | :von_neumann
+        }
 
   @spec new_grid(integer, atom) :: t
   def new_grid(length, neighborhood_type) do
@@ -22,21 +26,28 @@ defmodule Grid do
 
   defp von_neumann_coords({x, y}) do
     [
-      {x - 1, y},
       {x, y - 1},
+      {x - 1, y},
       {x, y},
-      {x, y + 1},
-      {x + 1, y}
+      {x + 1, y},
+      {x, y + 1}
     ]
   end
 
   defp moore_coords({x, y}) do
+    [n, w, c, e, s] = von_neumann_coords({x, y})
+
     [
       {x - 1, y - 1},
-      {x - 1, y + 1},
+      n,
       {x + 1, y - 1},
+      w,
+      c,
+      e,
+      {x - 1, y + 1},
+      s,
       {x + 1, y + 1}
-    ] ++ von_neumann_coords({x, y})
+    ]
   end
 
   defp get_cell(grid, x, y) do
@@ -45,10 +56,12 @@ defmodule Grid do
 
   @spec get_neighborhood(t, {integer, integer}) :: CA.word()[CA.bit()]
   def get_neighborhood(grid, coords) do
-    neighborhood_fn = case grid.type do
-      :moore -> &moore_coords/1
-      :von_neumann -> &von_neumann_coords/1
-    end
+    neighborhood_fn =
+      case grid.type do
+        :moore -> &moore_coords/1
+        :von_neumann -> &von_neumann_coords/1
+      end
+
     for {x2, y2} <- neighborhood_fn.(coords) do
       get_cell(grid, x2, y2)
     end
