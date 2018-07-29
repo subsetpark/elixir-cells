@@ -3,13 +3,14 @@ defmodule CA.VonNeumann do
   Von Neumann (2-dimensional) cellular automata.
   """
 
-  @spec bits :: integer
-  def bits, do: 9
+  @spec bits(:moore | :von_neumann) :: integer
+  def bits(:von_neumann), do: 5
+  def bits(:moore), do: 9
 
   defp produce(state, rules, coords) do
     production =
       state
-      |> Grid.get_moore_neighborhood(coords)
+      |> Grid.get_neighborhood(coords)
       |> CA.Util.produce(rules)
 
     Grid.set_coords(state, coords, production)
@@ -26,11 +27,11 @@ defmodule CA.VonNeumann do
   end
 
   @doc """
-  Generate a random bit grid of size `n`.
+  Generate a random binary grid of size `n`.
   """
-  @spec make_state(integer) :: Grid.t()
-  def make_state(n) do
-    grid = Grid.new_grid(n)
+  @spec make_state(integer, atom) :: Grid.t()
+  def make_state(n, neighborhood_type) do
+    grid = Grid.new_grid(n, neighborhood_type)
 
     f = fn coord_pair, acc ->
       value = :rand.uniform(2) - 1

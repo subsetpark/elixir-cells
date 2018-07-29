@@ -19,7 +19,7 @@ defmodule ElementaryTest do
 
   property "make state produces binary word of desired length" do
     check all length <- integer() |> filter(&(&1 > 0)) do
-      state = CA.Elementary.make_state(length)
+      state = CA.Elementary.make_state(length, :ok)
       assert length(state) == length
       assert Enum.all?(state, &(&1 == 0 or &1 == 1))
     end
@@ -32,7 +32,7 @@ defmodule GridsTest do
 
   property "new grid produces grid of correct size and values" do
     check all length <- integer() |> filter(&(&1 > 0)) do
-      grid = Grid.new_grid(length)
+      grid = Grid.new_grid(length, :von_neumann)
       values = Map.values(grid.map)
 
       assert length(values) == length * length
@@ -45,8 +45,8 @@ defmodule GridsTest do
               x <- integer() |> filter(&(&1 < length)),
               y <- integer() |> filter(&(&1 < length)) do
       assert length
-             |> Grid.new_grid()
-             |> Grid.get_moore_neighborhood({x, y})
+             |> Grid.new_grid(:moore)
+             |> Grid.get_neighborhood({x, y})
              |> length() == 9
     end
   end
@@ -58,7 +58,7 @@ defmodule VonNeumannTest do
 
   property "make state produces a random grid" do
     check all length <- integer() |> filter(&(&1 > 0)) do
-      state = CA.VonNeumann.make_state(length)
+      state = CA.VonNeumann.make_state(length, :moore)
 
       assert state.size == length
 

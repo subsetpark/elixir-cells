@@ -36,9 +36,9 @@ defmodule CA do
 
   @type system(t) :: {[rule(t)], atom}
 
-  @spec init(atom, integer, integer) :: {word(bit), system(bit)}
-  def init(module, rule_number, state_size) do
-    {module.make_state(state_size), {make_rules(rule_number, module.bits()), module}}
+  @spec init(atom, atom, integer, integer) :: {word(bit), system(bit)}
+  def init(module, neighborhood_type, rule_number, state_size) do
+    {module.make_state(state_size, neighborhood_type), {make_rules(rule_number, module.bits(neighborhood_type)), module}}
   end
 
   @spec run(word(any), system(any), integer) :: :ok

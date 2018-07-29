@@ -5,11 +5,8 @@ defmodule CA.Elementary do
 
   @type t :: CA.word(CA.bit())
 
-  @spec bits :: integer
-  def bits, do: 3
-
-  @spec produce(t, [CA.rule(CA.bit())]) :: t
-  def produce(state, rules), do: produce(state, rules, [], 0)
+  @spec bits(any) :: integer
+  def bits(_), do: 3
 
   defp produce(state, _, out, n) when n == length(state), do: Enum.reverse(out)
 
@@ -19,8 +16,17 @@ defmodule CA.Elementary do
     produce(state, rules, [production | out], n + 1)
   end
 
-  @spec make_state(integer) :: t
-  def make_state(n) when n >= 1 do
+  @doc """
+  Produce one new generation from `state`, given `rules`.
+  """
+  @spec produce(t, [CA.rule(CA.bit())]) :: t
+  def produce(state, rules), do: produce(state, rules, [], 0)
+
+  @doc """
+  Generate a random binary word of size `n`.
+  """
+  @spec make_state(integer, any) :: t
+  def make_state(n, _) when n >= 1 do
     for _ <- 1..n, do: :rand.uniform(2) - 1
   end
 
