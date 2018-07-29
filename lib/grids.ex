@@ -20,29 +20,42 @@ defmodule Grid do
     %Grid{map: map, size: length}
   end
 
-  defp surrounding_coords({x, y}) do
+  defp von_neumann_coords({x, y}) do
     [
-      {x - 1, y - 1},
       {x - 1, y},
-      {x - 1, y + 1},
       {x, y - 1},
       {x, y},
       {x, y + 1},
-      {x + 1, y - 1},
-      {x + 1, y},
-      {x + 1, y + 1}
+      {x + 1, y}
     ]
+  end
+
+  defp moore_coords({x, y}) do
+    [
+      {x - 1, y - 1},
+      {x - 1, y + 1},
+      {x + 1, y - 1},
+      {x + 1, y + 1}
+    ] ++ von_neumann_coords({x, y})
   end
 
   defp get_cell(grid, x, y) do
     Map.get(grid.map, to_index({x, y}, grid.size))
   end
 
-  @spec get_neighborhood(t, {integer, integer}) :: CA.word()[CA.bit()]
-  def get_neighborhood(grid, coords) do
-    for {x2, y2} <- surrounding_coords(coords) do
+  @spec get_neighborhood(t, {integer, integer}, fun) :: CA.word()[CA.bit()]
+  defp get_neighborhood(grid, coords, neighborhood_fn) do
+    for {x2, y2} <- neighborhood_fn.(coords) do
       get_cell(grid, x2, y2)
     end
+  end
+
+  def get_moore_neighborhood(grid, coords) do
+    get_neighborhood(grid, coords, &moore_coords/1)
+  end
+
+  def get_von_neumann_neighborhood(grid, coords) do
+    get_neighborhood(grid, coords, &von_neumann_coords/1)
   end
 
   defp to_index({x, y}, modulus) do

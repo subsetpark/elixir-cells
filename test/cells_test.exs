@@ -46,7 +46,7 @@ defmodule GridsTest do
               y <- integer() |> filter(&(&1 < length)) do
       assert length
              |> Grid.new_grid()
-             |> Grid.get_neighborhood({x, y})
+             |> Grid.get_moore_neighborhood({x, y})
              |> length() == 9
     end
   end

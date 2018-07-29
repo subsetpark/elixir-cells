@@ -9,7 +9,7 @@ defmodule CA.VonNeumann do
   defp produce(state, rules, coords) do
     production =
       state
-      |> Grid.get_neighborhood(coords)
+      |> Grid.get_moore_neighborhood(coords)
       |> CA.Util.produce(rules)
 
     Grid.set_coords(state, coords, production)
