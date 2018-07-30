@@ -11,7 +11,7 @@ defmodule CA.VonNeumann do
     production =
       state
       |> Grid.get_neighborhood(coords)
-      |> CA.Util.produce(rules)
+      |> CA.produce(rules)
 
     Grid.set_coords(state, coords, production)
   end
@@ -51,7 +51,7 @@ defmodule CA.VonNeumann do
 
     for row <- Grid.rows(state) do
       row
-      |> Enum.map(&CA.Util.render_cell/1)
+      |> Enum.map(&CA.render_cell/1)
       |> IO.puts()
     end
 

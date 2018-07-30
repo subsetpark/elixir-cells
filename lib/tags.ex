@@ -14,7 +14,7 @@ defmodule Tags do
   @typedoc """
   A tuple containing a set of drop and production rules for a tag system.
   """
-  @type tag_system :: {drop_number, alphabet, [CA.rule(char)]}
+  @type tag_system :: {drop_number, alphabet, CA.rules(char)}
 
   @typedoc """
   A number indicating how many elements to drop from the beginning of
@@ -33,7 +33,7 @@ defmodule Tags do
   def produce([@halting_char | _] = word, _), do: word
 
   def produce([h | _] = word, {drop, _, rules} = system) do
-    production = CA.Util.produce(h, rules)
+    production = CA.produce(h, rules)
     produce(Enum.drop(word, drop) ++ production, system)
   end
 
@@ -54,7 +54,7 @@ defmodule Tags do
       Logger.warn("No rules will terminate. This may result in an infinite loop.")
     end
 
-    {drop, get_alphabet(to_chars), to_chars}
+    {drop, get_alphabet(to_chars), Enum.into(to_chars, %{})}
   end
 
   defp atom_to_symbol(atom) do

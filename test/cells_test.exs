@@ -5,10 +5,9 @@ defmodule CellsTest do
   property "rules produce matching production" do
     check all word <- term(),
               production <- term(),
-              other_rule <- {term(), term()} do
-      word_rule = {word, production}
-
-      assert CA.Util.produce(word, [word_rule, other_rule]) == production
+              other_word <- term() |> filter(&(&1 !== word)),
+              other_production <- term() do
+      assert CA.produce(word, %{word => production, other_word => other_production}) == production
     end
   end
 end

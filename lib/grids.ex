@@ -34,8 +34,8 @@ defmodule Grid do
     ]
   end
 
-  defp moore_coords({x, y}) do
-    [n, w, c, e, s] = von_neumann_coords({x, y})
+  defp moore_coords({x, y} = c) do
+    [n, w, c, e, s] = von_neumann_coords(c)
 
     [
       {x - 1, y - 1},

@@ -9,7 +9,13 @@ defmodule Mix.Tasks.Ca do
         "moore" -> {CA.VonNeumann, :moore}
       end
 
-    {state, init} = CA.init(module, neighborhood_type, String.to_integer(rule_number), String.to_integer(size))
+    rule =
+      case rule_number do
+        "random" -> rule_number
+        n -> String.to_integer(n)
+      end
+
+    {state, init} = CA.init(module, neighborhood_type, rule, String.to_integer(size))
     CA.run(state, init, String.to_integer(iters))
   end
 

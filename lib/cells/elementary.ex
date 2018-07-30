@@ -12,7 +12,7 @@ defmodule CA.Elementary do
 
   defp produce(state, rules, out, n) do
     neighborhood = for k <- -1..1, i = rem(k + n, length(state)), do: Enum.fetch!(state, i)
-    production = CA.Util.produce(neighborhood, rules)
+    production = CA.produce(neighborhood, rules)
     produce(state, rules, [production | out], n + 1)
   end
 
@@ -32,7 +32,7 @@ defmodule CA.Elementary do
 
   @spec render(t) :: t
   def render(s) do
-    :ok = IO.puts(for d <- s, do: CA.Util.render_cell(d))
+    :ok = IO.puts(for d <- s, do: CA.render_cell(d))
     s
   end
 end
