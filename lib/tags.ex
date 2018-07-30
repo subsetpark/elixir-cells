@@ -34,7 +34,20 @@ defmodule Tags do
 
   def produce([h | _] = word, {drop, _, rules} = system) do
     production = CA.produce(h, rules)
-    produce(Enum.drop(word, drop) ++ production, system)
+
+    word
+    |> Enum.drop(drop)
+    |> Kernel.++(production)
+    |> produce(system)
+  end
+
+  defp atom_to_symbol(atom) do
+    charlist = Atom.to_charlist(atom)
+
+    case length(charlist) do
+      1 -> hd(charlist)
+      _ -> raise "Ruleset keys must be one character long"
+    end
   end
 
   @doc """
@@ -57,15 +70,6 @@ defmodule Tags do
     {drop, get_alphabet(to_chars), Enum.into(to_chars, %{})}
   end
 
-  defp atom_to_symbol(atom) do
-    charlist = Atom.to_charlist(atom)
-
-    case length(charlist) do
-      1 -> hd(charlist)
-      _ -> raise "Ruleset keys must be one character long"
-    end
-  end
-
   defp get_alphabet(rules) do
     [@halting_char | for({symbol, _} <- rules, do: symbol)]
   end
@@ -73,8 +77,8 @@ defmodule Tags do
   @doc """
   Generate a random word from a system's alphabet.
   """
-  @spec make_state(drop_number, tag_system) :: CA.word(char)
-  def make_state(size, {_, alphabet, _}) do
+  @spec make_state(tag_system, drop_number) :: CA.word(char)
+  def make_state({_, alphabet, _}, size) do
     for _ <- 1..size, do: Enum.random(alphabet)
   end
 end
