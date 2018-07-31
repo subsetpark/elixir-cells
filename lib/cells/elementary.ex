@@ -8,19 +8,26 @@ defmodule CA.Elementary do
   @spec bits(any) :: integer
   def bits(_), do: 3
 
-  defp produce(state, _, out, n) when n == length(state), do: Enum.reverse(out)
+  defp produce(_, _, acc, n, n), do: Enum.reverse(acc)
 
-  defp produce(state, rules, out, n) do
-    neighborhood = for k <- -1..1, i = rem(k + n, length(state)), do: Enum.fetch!(state, i)
-    production = CA.produce(neighborhood, rules)
-    produce(state, rules, [production | out], n + 1)
+  defp produce(state, rules, acc, n, m) do
+    production =
+      Stream.cycle(state)
+      # Create a cycle starting with the last element of the state.
+      |> Stream.drop(length(state) - 1)
+      # A 3-slice starting at `n` will now start one back, modulo the
+      # length of the state.
+      |> Enum.slice(n, 3)
+      |> CA.produce(rules)
+
+    produce(state, rules, [production | acc], n + 1, m)
   end
 
   @doc """
   Produce one new generation from `state`, given `rules`.
   """
   @spec produce(t, [CA.rule(CA.bit())]) :: t
-  def produce(state, rules), do: produce(state, rules, [], 0)
+  def produce(state, rules), do: produce(state, rules, [], 0, length(state))
 
   @doc """
   Generate a random binary word of size `n`.
@@ -32,7 +39,7 @@ defmodule CA.Elementary do
 
   @spec render(t) :: t
   def render(s) do
-    :ok = IO.puts(for d <- s, do: CA.render_cell(d))
+    :ok = IO.puts(Enum.map(s, &CA.render_cell/1))
     s
   end
 end
