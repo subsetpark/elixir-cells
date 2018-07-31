@@ -17,9 +17,9 @@ defmodule Grid do
       for(
         y <- 0..(length - 1),
         x <- 0..(length - 1),
-        do: {x, y}
+        do: {{x, y}, 0},
+        into: %{}
       )
-      |> Enum.reduce(%{}, fn k, m -> Map.put(m, k, 0) end)
 
     %Grid{map: map, size: length, type: neighborhood_type}
   end
