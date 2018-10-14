@@ -1,5 +1,5 @@
 defmodule CA do
-  @doc """
+  @moduledoc """
   Entry module for initializing and running cellular automata.
   """
   @type t :: any()

@@ -33,12 +33,10 @@ defmodule CA.VonNeumann do
   def make_state(n, neighborhood_type) do
     grid = Grid.new_grid(n, neighborhood_type)
 
-    f = fn coord_pair, acc ->
+    Enum.reduce(Grid.coords(grid), grid, fn coord_pair, acc ->
       value = :rand.uniform(2) - 1
       Grid.set_coords(acc, coord_pair, value)
-    end
-
-    Enum.reduce(Grid.coords(grid), grid, f)
+    end)
   end
 
   @doc """
