@@ -40,15 +40,14 @@ defmodule Mix.Tasks.Svg do
     |> run_for(module, rules, n - 1)
   end
 
-  def render_state(state) do
-    state
-    |> Svg.render()
-    |> IO.puts()
+  def render_state(state, filename) do
+    rendered = Svg.render(state)
 
-    state
+    File.write(filename, rendered)
+    |> IO.inspect()
   end
 
-  def run([type, rule_number, size]) do
+  def run([type, rule_number, size, step]) do
     {module, neighborhood_type, rule} = Mix.Tasks.Ca.args(type, rule_number)
     {state, {rules, module}} = CA.init(module, neighborhood_type, rule, String.to_integer(size))
 
@@ -66,12 +65,12 @@ defmodule Mix.Tasks.Svg do
     {_, svg} =
       offsets
       |> Enum.reduce({state, svg}, fn offset, {state, svg} ->
-        state = run_for(state, module, rules, 20)
+        state = run_for(state, module, rules, String.to_integer(step))
         svg = Ca.Svg.add_cells(svg, state, offset)
 
         {state, svg}
       end)
 
-    render_state(svg)
+    render_state(svg, "#{rule_number}-#{size}-#{step}.svg")
   end
 end
