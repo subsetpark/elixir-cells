@@ -47,7 +47,7 @@ defmodule Mix.Tasks.Svg do
     |> IO.inspect()
   end
 
-  def run([type, rule_number, size, step]) do
+  def run([type, rule_number, size, step, begin_at]) do
     {module, neighborhood_type, rule} = Mix.Tasks.Ca.args(type, rule_number)
     {state, {rules, module}} = CA.init(module, neighborhood_type, rule, String.to_integer(size))
 
@@ -59,6 +59,7 @@ defmodule Mix.Tasks.Svg do
       {10, 110},
       {60, 110}
     ]
+    state = run_for(state, module, rules, begin_at |> String.to_integer())
 
     svg = %Svg{width: 110, height: 170}
 
@@ -71,6 +72,6 @@ defmodule Mix.Tasks.Svg do
         {state, svg}
       end)
 
-    render_state(svg, "#{rule_number}-#{size}-#{step}.svg")
+    render_state(svg, "#{type}-#{rule_number}-#{size}-#{step}-#{begin_at}.svg")
   end
 end
