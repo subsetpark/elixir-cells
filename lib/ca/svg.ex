@@ -1,15 +1,5 @@
 defmodule Ca.Svg do
-  # <rect width="100%" height="100%" fill="#fff"/>
-
-  # <rect width="128" height="16" x="17" y="17" fill="#000"/>
-
-  # <rect width="80" height="16" x="161" y="17" fill="#000"/>
-
-  # <rect width="48" height="16" x="289" y="17" fill="#000"/>
-
-  # <rect width="112" height="16" x="433" y="17" fill="#000"/>
-
-  # <rect width="80" height="16" x="561" y="17" fill="#000"/>
+  alias Ca.Svg.Cell
 
   defstruct width: 0, height: 0, cells: []
 
@@ -21,20 +11,22 @@ defmodule Ca.Svg do
             (map
              |> Enum.filter(&match?({_, 1}, &1))
              |> Enum.map(&elem(&1, 0))
-             |> Enum.map(&Ca.Svg.Cell.from_tuple/1)
-             |> Enum.map(&Ca.Svg.Cell.offset(&1, offset)))
+             |> Enum.map(&Cell.from_tuple/1)
+             |> Enum.map(&Cell.offset(&1, offset)))
     }
   end
 
   def render(%__MODULE__{width: width, height: height, cells: cells}) do
     contents =
       cells
-      |> Enum.map(&Ca.Svg.Cell.render/1)
+      |> Enum.map(&Cell.render/1)
       |> Enum.join("\n")
 
-    ~s(<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 #{width} #{height}" width="#{width}" height="#{
-      height
-    }">#{contents}</svg>)
+    """
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 11in 17in" width="#{width}" height="#{height}">
+    #{contents}
+    </svg>
+    """
   end
 end
 

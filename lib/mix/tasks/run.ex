@@ -47,24 +47,28 @@ defmodule Mix.Tasks.Svg do
     |> IO.inspect()
   end
 
+  @row_num 3
+  @col_num 2
+
+  @width 40
+  @offset 10
+
+  defp col(n), do: @offset + (@width + @offset) * n
+
   def run([type, rule_number, size, step, begin_at]) do
     {module, neighborhood_type, rule} = Mix.Tasks.Ca.args(type, rule_number)
     {state, {rules, module}} = CA.init(module, neighborhood_type, rule, String.to_integer(size))
 
-    offsets = [
-      {10, 10},
-      {60, 10},
-      {10, 60},
-      {60, 60},
-      {10, 110},
-      {60, 110}
-    ]
     state = run_for(state, module, rules, begin_at |> String.to_integer())
 
-    svg = %Svg{width: 110, height: 170}
+    svg = %Svg{
+      width: @width * @col_num + @offset * (@col_num + 1),
+      height: @width * @row_num + @offset * (@row_num + 1)
+    }
 
     {_, svg} =
-      offsets
+      for(n <- 0..(@col_num - 1), m <- 0..(@row_num - 1), do: {col(n), col(m)})
+      |> Enum.sort()
       |> Enum.reduce({state, svg}, fn offset, {state, svg} ->
         state = run_for(state, module, rules, String.to_integer(step))
         svg = Ca.Svg.add_cells(svg, state, offset)
