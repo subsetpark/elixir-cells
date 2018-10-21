@@ -33,13 +33,6 @@ defmodule Mix.Tasks.Svg do
   use Mix.Task
   alias Ca.Svg
 
-  def run_for(state, _, _, 0), do: state
-
-  def run_for(state, module, rules, n) do
-    module.produce(state, rules)
-    |> run_for(module, rules, n - 1)
-  end
-
   def render_state(state, filename) do
     rendered = Svg.render(state)
 
@@ -47,35 +40,23 @@ defmodule Mix.Tasks.Svg do
     |> IO.inspect()
   end
 
-  @row_num 3
   @col_num 2
-
-  @width 40
-  @offset 10
-
-  defp col(n), do: @offset + (@width + @offset) * n
+  @row_num 3
 
   def run([type, rule_number, size, step, begin_at]) do
     {module, neighborhood_type, rule} = Mix.Tasks.Ca.args(type, rule_number)
     {state, {rules, module}} = CA.init(module, neighborhood_type, rule, String.to_integer(size))
 
-    state = run_for(state, module, rules, begin_at |> String.to_integer())
+    run_for = fn state, n ->
+      1..String.to_integer(n)
+      |> Enum.reduce(state, fn _, state -> module.produce(state, rules) end)
+    end
 
-    svg = %Svg{
-      width: @width * @col_num + @offset * (@col_num + 1),
-      height: @width * @row_num + @offset * (@row_num + 1)
-    }
+    rendered =
+      state
+      |> Svg.generate(@col_num, @row_num, begin_at, step, run_for)
+      |> Svg.render()
 
-    {_, svg} =
-      for(n <- 0..(@col_num - 1), m <- 0..(@row_num - 1), do: {col(n), col(m)})
-      |> Enum.sort()
-      |> Enum.reduce({state, svg}, fn offset, {state, svg} ->
-        state = run_for(state, module, rules, String.to_integer(step))
-        svg = Ca.Svg.add_cells(svg, state, offset)
-
-        {state, svg}
-      end)
-
-    render_state(svg, "#{type}-#{rule_number}-#{size}-#{step}-#{begin_at}.svg")
+    File.write("#{type}-#{rule_number}-#{size}-#{step}-#{begin_at}.svg", rendered)
   end
 end

@@ -3,7 +3,44 @@ defmodule Ca.Svg do
 
   defstruct width: 0, height: 0, cells: []
 
-  def add_cells(%__MODULE__{cells: cells} = svg, %{map: map}, offset) do
+  @width 40
+  @offset 10
+
+  def generate(state, col_num, row_num, begin_at, step, run_for) do
+    svg = %__MODULE__{
+      width: @width * col_num + @offset * (col_num + 1),
+      height: @width * row_num + @offset * (row_num + 1)
+    }
+
+    state = run_for.(state, begin_at)
+
+    for(n <- 0..(col_num - 1), m <- 0..(row_num - 1), do: {col(n), col(m)})
+    |> Enum.sort()
+    |> Enum.reduce({state, svg}, fn offset, {state, svg} ->
+      state = run_for.(state, step)
+      svg = add_cells(svg, state, offset)
+
+      {state, svg}
+    end)
+    |> elem(1)
+  end
+
+  def render(%__MODULE__{width: width, height: height, cells: cells}) do
+    contents =
+      cells
+      |> Enum.map(&Cell.render/1)
+      |> Enum.join("\n")
+
+    """
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 11in 17in" width="#{width}" height="#{
+      height
+    }">
+    #{contents}
+    </svg>
+    """
+  end
+
+  defp add_cells(%__MODULE__{cells: cells} = svg, %{map: map}, offset) do
     %{
       svg
       | cells:
@@ -16,18 +53,7 @@ defmodule Ca.Svg do
     }
   end
 
-  def render(%__MODULE__{width: width, height: height, cells: cells}) do
-    contents =
-      cells
-      |> Enum.map(&Cell.render/1)
-      |> Enum.join("\n")
-
-    """
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 11in 17in" width="#{width}" height="#{height}">
-    #{contents}
-    </svg>
-    """
-  end
+  defp col(n), do: @offset + (@width + @offset) * n
 end
 
 defmodule Ca.Svg.Cell do
